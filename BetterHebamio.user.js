@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         BetterHebamio
-// @version      1.1
+// @version      1.2
 // @author       Plimbus
 // @copyright    Plimbus, lizensiert unter GPL-3.0
 // @description  Weil die Bedienung mit der Maus einfach umständlich ist.
@@ -20,7 +20,7 @@
 
 	// Definitionen und Elemente
     const baseDomain = window.location.hostname.split('.')[0];
-	let nextButton, carlogButton, submitButton, backButton1, backButton2;
+	let nextButton, carlogButton, submitButton, backButton1, backButton2, printReceiptButton;
 
     // Automatische Umleitung im Kalender
     const currentUrl = window.location.href;
@@ -33,13 +33,19 @@
 
     window.addEventListener('DOMContentLoaded', () => {
 		// Alle nötigen Elemente finden
-		nextButton = document.querySelector('a.btn.btn-primary[style="float: right"]');
+		nextButton = Array.from(document.querySelectorAll('a.btn.btn-primary[style="float: right"], a.btn.btn-primary[href="javascript:void(0)"]'))
+			.find(el => el.textContent.includes("weiter"));
 		carlogButton = document.querySelector('button.btn.btn-primary[form="carlog-api-form"]');
 		submitButton = document.querySelector('button.btn.btn-primary[form="care"], button.btn.btn-primary.flex-fill.ms-4.ms-md-2.px-4.py-2[form="clientForm"]');
 		backButton1 = document.querySelector('a.btn.btn-link[style="float: left"][x-show="data.tab === 1"][href], a.btn.btn-link[style="float: left;"][x-show="data.tab === 1"][href]');
+		if(!backButton1) {
+			backButton1 = Array.from(document.querySelectorAll('a.btn.btn-link[href="javascript:void(0)"]'))
+				.find(el => el.textContent.trim() === 'zurück');
+		}
+		printReceiptButton = document.querySelector('a.btn.btn-default.btn-xs.pull-right.desktop[href*="/client/invoice/invoice-type-select"]');
 
 		// Tastenkürzel sichtbar machen
-		if(document.body.innerHTML.includes('Tour berechnen')) {
+		if (document.body.innerHTML.includes('Tour berechnen')) {
 			document.body.innerHTML = document.body.innerHTML.replace(/Tour berechnen/g, '<b><u>T</u></b>our berechnen');
 		}
 		if(nextButton) {
@@ -63,6 +69,16 @@
 				parent.innerHTML = '<i class="fa fa-arrow-left fa-fw"></i> <b><u>z</u></b>urück';
 			}
 		});
+		if(backButton1) {
+			if(backButton1.innerHTML.includes('zurück')) {
+				backButton1.innerHTML = backButton1.innerHTML.replace(/zurück/, '<b><u>z</u></b>urück');
+			}
+		}
+		if(printReceiptButton) {
+			if(printReceiptButton.innerHTML.includes('Beleg erstellen')) {
+				printReceiptButton.innerHTML = printReceiptButton.innerHTML.replace(/Beleg erstellen/, '<b><u>B</u></b>eleg erstellen');
+			}
+		}
 
 
 		// Eingabefeld für Touren automatisch fokussieren
@@ -136,7 +152,10 @@
             case 'a':
                 // Select all Frauen for a tour
                 // Get all checkboxes with name=cares_after[] or cares_before[] and check/uncheck them all
-                const checkboxes = document.querySelectorAll('input[type="checkbox"][name^="cares_"]');
+                let checkboxes = document.querySelectorAll('input[type="checkbox"][name^="cares_"]');
+				if(!checkboxes.length) {
+					checkboxes = document.querySelectorAll('input[type="checkbox"].dont-bind-nicer-checkbox');
+				}
                 const allChecked = Array.from(checkboxes).every(checkbox => checkbox.checked);
                 checkboxes.forEach(checkbox => {
                     checkbox.click();
@@ -145,6 +164,7 @@
 
             case 's':
                 // Submit the form
+				// Klappt bei Telephonischen Beratungen nicht
                 if (submitButton) submitButton.click();
                 break;
 
@@ -176,6 +196,10 @@
 				// Go back to the previous page
 				backButton2 = Array.from(document.querySelectorAll('a.btn.btn-link[style="float: left;"][x-show="data.tab !== 1"][href="#"]'))
 					.find(el => el.getAttribute('@click.prevent') === 'back()');
+					if(!backButton1) {
+						backButton1 = Array.from(document.querySelectorAll('a.btn.btn-link[href="javascript:void(0)"]'))
+							.find(el => el.textContent.trim() === 'zurück');
+					}
 
 				if (backButton1) {
 					if (backButton1.style.display == "none") {
@@ -190,6 +214,14 @@
 						backButton2.click();
 					}
 				}
+			
+			case 'b':
+				// Print receipt
+				if (printReceiptButton) window.open(printReceiptButton.href, '_blank', 'noopener,noreferrer');
+				break;
+
+			default:
+				break;
         }
     });
 })();
