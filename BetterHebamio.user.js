@@ -23,12 +23,15 @@
 	let nextButton, carlogButton, submitButton, backButton1, backButton2, printReceiptButton;
 	let clockCheckbox, clockText;
 	let driveCheckbox, driveText;
+	let saveAnywayButton, dontSaveButton, inPraxisCheckbox, inPraxisText;
+	let materialRateCheckbox, materialRateText;
+	let firstCareCheckbox, firstCareText;
 
     // Automatische Umleitung im Kalender
     const currentUrl = window.location.href;
     const match = currentUrl.match(/\/client\/(\d+)\/care-(after|before)\/review\/(\d+)/);
     if (match) {
-        const [_, clientId, careType, reviewId] = match;
+		const [_, , careType, reviewId] = match;
         const newUrl = `https://${baseDomain}.hebamio.de/client/care/edit/${reviewId}/${careType}`;
         window.location.replace(newUrl);
     }
@@ -47,7 +50,17 @@
 		printReceiptButton = document.querySelector('a.btn.btn-default.btn-xs.pull-right.desktop[href*="/client/invoice/invoice-type-select"]');
 		clockText = document.querySelector('label.form-check-label[for="date_only-1"]');
 		driveText = document.querySelector('label.form-check-label[for="single_trip-1"]');
+		saveAnywayButton = document.querySelector('button.btn.btn-outline-primary.ignore-confirm[data-empty-child-submit="save"]');
+		dontSaveButton = document.querySelector('button.btn.btn-outline-primary[data-bs-dismiss="modal"]');
+		inPraxisCheckbox = document.querySelector('input#in-ordination-1');
+		inPraxisText = document.querySelector('label.form-check-label[for="in-ordination-1"]');
+		materialRateCheckbox = document.querySelector('input#material-rate');
+		materialRateText = document.querySelector('label.form-check-label[for="material-rate"]');
+		firstCareCheckbox = document.querySelector('input#is_first_care-1');
+		firstCareText = document.querySelector('label.form-check-label[for="is_first_care-1"]');
 
+		// This can be what
+		// Dont change
 		// Tastenkürzel sichtbar machen
 		if (document.body.innerHTML.includes('Tour berechnen')) {
 			document.body.innerHTML = document.body.innerHTML.replace(/Tour berechnen/g, '<b><u>T</u></b>our berechnen');
@@ -91,6 +104,31 @@
 		if(driveText) {
 			if(driveText.innerHTML.includes('Einzelfahrt')) {
 				driveText.innerHTML = driveText.innerHTML.replace(/Einzelfahrt/, '<b><u>E</u></b>inzelahrt');
+			}
+		}
+		if(saveAnywayButton) {
+			if(saveAnywayButton.innerHTML.includes('trotzdem speichern')) {
+				saveAnywayButton.innerHTML = saveAnywayButton.innerHTML.replace(/trotzdem speichern/, '<b><u>t</u></b>rotzdem speichern');
+			}
+		}
+		if(dontSaveButton) {
+			if(dontSaveButton.innerHTML.includes('nicht speichern')) {
+				dontSaveButton.innerHTML = dontSaveButton.innerHTML.replace(/nicht speichern/, '<b><u>n</u></b>icht speichern');
+			}
+		}
+		if(inPraxisText) {
+			if(inPraxisText.innerHTML.includes('Praxis')) {
+				inPraxisText.innerHTML = inPraxisText.innerHTML.replace(/Praxis/, '<b><u>P</u></b>raxis');
+			}
+		}
+		if(materialRateText) {
+			if(materialRateText.innerHTML.includes('Materialpauschale')) {
+				materialRateText.innerHTML = materialRateText.innerHTML.replace(/Materialpauschale/, '<b><u>M</u></b>aterialpauschale');
+			}
+		}
+		if(firstCareText) {
+			if(firstCareText.innerHTML.includes('Wochenbettbetreuung')) {
+				firstCareText.innerHTML = firstCareText.innerHTML.replace(/Wochenbettbetreuung/, '<b><u>W</u></b>ochenbettbetreuung');
 			}
 		}
 
@@ -159,6 +197,11 @@
         switch (event.key) {
             case 'w':
                 // Click 'weiter' or 'speichern' button
+				if (firstCareCheckbox && firstCareCheckbox.type === 'checkbox') {
+					firstCareCheckbox.checked = !firstCareCheckbox.checked;
+					firstCareCheckbox.dispatchEvent(new Event('change'));
+					break;
+				}
                 if (nextButton && nextButton.style.display !== "none") nextButton.click();
 				if (carlogButton && nextButton && nextButton.style.display == "none") carlogButton.click();
                 break;
@@ -184,24 +227,28 @@
 
             case 'm':
                 // Toggle 'Materialpauschale verrechnen' checkbox
-                const checkbox = document.querySelector('input#material-rate');
-                if (checkbox && checkbox.type === 'checkbox') {
-                    checkbox.checked = !checkbox.checked;
-                    checkbox.dispatchEvent(new Event('change'));
+                if (materialRateCheckbox && materialRateCheckbox.type === 'checkbox') {
+                    materialRateCheckbox.checked = !materialRateCheckbox.checked;
+                    materialRateCheckbox.dispatchEvent(new Event('change'));
                 }
                 break;
 
             case 'p':
                 // Toggle 'in Praxis' checkbox
-                const inPraxisCheckbox = document.querySelector('input#in-ordination-1');
                 if (inPraxisCheckbox && inPraxisCheckbox.type === 'checkbox') {
                     inPraxisCheckbox.checked = !inPraxisCheckbox.checked;
                     inPraxisCheckbox.dispatchEvent(new Event('change'));
                 }
                 break;
 
+			case 'n':
+				// Click 'nicht speichern' button
+				if (dontSaveButton) dontSaveButton.click();
+				break;
+
             case 't':
                 // Create new tour
+				if (saveAnywayButton) saveAnywayButton.click();
                 const tourButton = document.querySelector(`a.btn.btn-primary[href="https://${baseDomain}.hebamio.de/car-log/google-maps/create"]`);
                 if (tourButton) tourButton.click();
                 break;
