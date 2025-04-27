@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         BetterHebamio
-// @version      1.2
+// @version      1.3
 // @author       Plimbus
 // @copyright    Plimbus, lizensiert unter GPL-3.0
 // @description  Weil die Bedienung mit der Maus einfach umständlich ist.
@@ -21,6 +21,8 @@
 	// Definitionen und Elemente
     const baseDomain = window.location.hostname.split('.')[0];
 	let nextButton, carlogButton, submitButton, backButton1, backButton2, printReceiptButton;
+	let clockCheckbox, clockText;
+	let driveCheckbox, driveText;
 
     // Automatische Umleitung im Kalender
     const currentUrl = window.location.href;
@@ -36,13 +38,15 @@
 		nextButton = Array.from(document.querySelectorAll('a.btn.btn-primary[style="float: right"], a.btn.btn-primary[href="javascript:void(0)"]'))
 			.find(el => el.textContent.includes("weiter"));
 		carlogButton = document.querySelector('button.btn.btn-primary[form="carlog-api-form"]');
-		submitButton = document.querySelector('button.btn.btn-primary[form="care"], button.btn.btn-primary.flex-fill.ms-4.ms-md-2.px-4.py-2[form="clientForm"]');
+		submitButton = document.querySelector('button.btn.btn-primary[form="care"], button.btn.btn-primary.flex-fill.ms-4.ms-md-2.px-4.py-2[form="clientForm"], button.btn.btn-primary[form="phone-form"]');
 		backButton1 = document.querySelector('a.btn.btn-link[style="float: left"][x-show="data.tab === 1"][href], a.btn.btn-link[style="float: left;"][x-show="data.tab === 1"][href]');
 		if(!backButton1) {
 			backButton1 = Array.from(document.querySelectorAll('a.btn.btn-link[href="javascript:void(0)"]'))
 				.find(el => el.textContent.trim() === 'zurück');
 		}
 		printReceiptButton = document.querySelector('a.btn.btn-default.btn-xs.pull-right.desktop[href*="/client/invoice/invoice-type-select"]');
+		clockText = document.querySelector('label.form-check-label[for="date_only-1"]');
+		driveText = document.querySelector('label.form-check-label[for="single_trip-1"]');
 
 		// Tastenkürzel sichtbar machen
 		if (document.body.innerHTML.includes('Tour berechnen')) {
@@ -77,6 +81,16 @@
 		if(printReceiptButton) {
 			if(printReceiptButton.innerHTML.includes('Beleg erstellen')) {
 				printReceiptButton.innerHTML = printReceiptButton.innerHTML.replace(/Beleg erstellen/, '<b><u>B</u></b>eleg erstellen');
+			}
+		}
+		if(clockText) {
+			if(clockText.innerHTML.includes('Uhrzeit ausblenden')) {
+				clockText.innerHTML = clockText.innerHTML.replace(/Uhrzeit ausblenden/, '<b><u>U</u></b>hrzeit ausblenden');
+			}
+		}
+		if(driveText) {
+			if(driveText.innerHTML.includes('Einzelfahrt')) {
+				driveText.innerHTML = driveText.innerHTML.replace(/Einzelfahrt/, '<b><u>E</u></b>inzelahrt');
 			}
 		}
 
@@ -218,6 +232,21 @@
 			case 'b':
 				// Print receipt
 				if (printReceiptButton) window.open(printReceiptButton.href, '_blank', 'noopener,noreferrer');
+				break;
+
+			case 'u':
+				// Toggle 'Uhrzeit' checkbox
+				clockCheckbox = document.querySelector('input#date_only-1');
+				if (clockCheckbox && clockCheckbox.type === 'checkbox') {
+					clockCheckbox.click();
+				}
+
+			case 'e':
+				// Toggle 'Einzelfahrt' checkbox
+				driveCheckbox = document.querySelector('input#single_trip-1');
+				if (driveCheckbox && driveCheckbox.type === 'checkbox') {
+					driveCheckbox.click();
+				}
 				break;
 
 			default:
