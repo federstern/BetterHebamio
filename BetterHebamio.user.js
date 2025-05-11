@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         BetterHebamio
-// @version      1.3
+// @version      1.4
 // @author       Plimbus
 // @copyright    Plimbus, lizensiert unter GPL-3.0
 // @description  Weil die Bedienung mit der Maus einfach umständlich ist.
@@ -58,6 +58,11 @@
 		materialRateText = document.querySelector('label.form-check-label[for="material-rate"]');
 		firstCareCheckbox = document.querySelector('input#is_first_care-1');
 		firstCareText = document.querySelector('label.form-check-label[for="is_first_care-1"]');
+
+		// let continuePraxisCheckbox = document.querySelector('input#in_ordination');
+		// let continuePraxisCheckboxLabel = continuePraxisCheckbox?.closest('label');
+
+		// continuePraxisCheckboxLabel.innerHTML.replace(/Einrichtung/, '<b><u>[P]</u></b> Einrichtung');
 
 		// This can be what
 		// Dont change
@@ -145,6 +150,8 @@
 		// Knopf um alle Termine eines Tages in neuen Tabs zu öffnen und bearbeiten
 		// Und sowas braucht man auch für Termine für Schwangerschaft und Wochenbett
         if (currentUrl.startsWith(`https://${baseDomain}.hebamio.de/calendar`)) {
+			//const continueAddEntryButton = document.querySelector('a.next-tab.btn.btn-primary[href="#type"]');
+
 			const dateDiv = document.querySelector('div.date div.head');
 			dateDiv.style.height = '135px';
 			
@@ -192,11 +199,31 @@
     // Tastenkürzel
     document.addEventListener('keydown', function (event) {
 		// Das wirft zwar eine Warnung, aber es ist egal
+		if(event.key === "q") {
+			if (document.activeElement.matches('input, textarea, select')) {
+				document.activeElement.blur();
+				event.preventDefault();
+			}
+		}
         if (document.activeElement.matches('input, textarea, select')) return;
 
         switch (event.key) {
             case 'w':
                 // Click 'weiter' or 'speichern' button
+				if (currentUrl.startsWith(`https://${baseDomain}.hebamio.de/calendar`)) {
+					let continueAddEntryButton = document.querySelector('a.next-tab.btn.btn-primary[href="#type"]');
+					let continueAddEntryButton2 = document.querySelector('a.next-tab.btn.btn-primary[href="#customer"]');
+
+					let continueAddEntryDiv = document.getElementById("date");
+					let continueAddEntryDiv2 = document.getElementById("type");
+					if (continueAddEntryButton && continueAddEntryDiv.classList.contains("active")) {
+						continueAddEntryButton.click();
+						break;
+					} else if (continueAddEntryButton2 && continueAddEntryDiv2.classList.contains("active")) {
+						continueAddEntryButton2.click();
+						break;
+					}
+				}
 				if (firstCareCheckbox && firstCareCheckbox.type === 'checkbox') {
 					firstCareCheckbox.checked = !firstCareCheckbox.checked;
 					firstCareCheckbox.dispatchEvent(new Event('change'));
@@ -222,6 +249,14 @@
             case 's':
                 // Submit the form
 				// Klappt bei Telephonischen Beratungen nicht
+				if (currentUrl.startsWith(`https://${baseDomain}.hebamio.de/calendar`)) {
+					let continueAddEntryButton = document.querySelector('button.btn.btn-primary.validate-modal i.fa.fa-save');
+					if (continueAddEntryButton) {
+						continueAddEntryButton.closest('button').click();
+						break;
+					}
+				}
+
                 if (submitButton) submitButton.click();
                 break;
 
@@ -235,6 +270,18 @@
 
             case 'p':
                 // Toggle 'in Praxis' checkbox
+				if (currentUrl.startsWith(`https://${baseDomain}.hebamio.de/calendar`)) {
+					let continuePraxisCheckbox = document.querySelector('input#in_ordination');
+					let continuePraxisCheckboxLabel = continuePraxisCheckbox?.closest('label');
+
+					// if (continuePraxisCheckbox && continuePraxisCheckbox.type === 'checkbox') {
+					// 	continuePraxisCheckbox.checked = !continuePraxisCheckbox.checked;
+					// 	continuePraxisCheckbox.dispatchEvent(new Event('change'));
+					// }
+					if (continuePraxisCheckboxLabel) {
+						continuePraxisCheckboxLabel.click();
+					}
+				}
                 if (inPraxisCheckbox && inPraxisCheckbox.type === 'checkbox') {
                     inPraxisCheckbox.checked = !inPraxisCheckbox.checked;
                     inPraxisCheckbox.dispatchEvent(new Event('change'));
@@ -295,6 +342,19 @@
 					driveCheckbox.click();
 				}
 				break;
+
+			case 'h':
+				if (currentUrl.startsWith(`https://${baseDomain}.hebamio.de/calendar`)) {
+					let hbbCheckbox = document.querySelector('input[type="radio"][name="type"][id="option10"][value="care_before_complaints"][data-client="1"]');
+					let hbbCheckboxLabel = hbbCheckbox?.closest('label');
+					// if (hbbCheckbox && hbbCheckbox.type === 'radio') {
+					// 	hbbCheckbox.checked = !hbbCheckbox.checked;
+					// 	hbbCheckbox.dispatchEvent(new Event('change'));
+					// }
+					if (hbbCheckboxLabel) {
+						hbbCheckboxLabel.click();
+					}
+				}
 
 			default:
 				break;
